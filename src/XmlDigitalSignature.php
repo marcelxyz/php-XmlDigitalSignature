@@ -396,7 +396,6 @@ class XmlDigitalSignature
 			if (false === $privKey)
 			{
 				throw new \UnexpectedValueException('Unable to load the private key');
-				return false;
 			}
 			
 			$this->privateKey = $privKey;
@@ -409,7 +408,6 @@ class XmlDigitalSignature
 			if (false === $pubKey)
 			{
 				throw new \UnexpectedValueException('Unable to load the public key');
-				return false;
 			}
 			
 			$this->publicKey = $pubKey;
@@ -430,7 +428,6 @@ class XmlDigitalSignature
 		if (!file_exists($filePath) || !is_readable($filePath))
 		{
 			throw new \UnexpectedValueException(sprintf('Unable to open the "%s" file', $filePath));
-			return false;
 		}
 			
 		$key = @file_get_contents($filePath);
@@ -438,7 +435,6 @@ class XmlDigitalSignature
 		if (empty($key))
 		{
 			throw new \UnexpectedValueException(sprintf('File "%s" appears to be empty', $filePath));
-			return false;
 		}
 		
 		return $key;
@@ -482,7 +478,6 @@ class XmlDigitalSignature
 			if (!$keyNode->loadXML($publicKey))
 			{
 				throw new \InvalidArgumentException('The provided public XML key does not appear to be well structured XML');
-				return false;
 			}
 		}
 		// DOM nodes are sexy as fuck
@@ -494,7 +489,6 @@ class XmlDigitalSignature
 		else
 		{
 			throw new \InvalidArgumentException('Unsupported XML public key provided');
-			return false;
 		}
 		
 		// add the key to the DOM
@@ -522,7 +516,6 @@ class XmlDigitalSignature
 		if (is_null($keyValue))
 		{
 			throw new \UnexpectedValueException('Unabled to locate the KeyValue node');
-			return false;
 		}
 		
 		// we have to add the proper namespace prefixes to all of the nodes in the public key DOM
@@ -620,7 +613,6 @@ class XmlDigitalSignature
 		if (is_null($signedInfo))
 		{
 			throw new \UnexpectedValueException('Unabled to locate the SignedInfo node');
-			return false;
 		}
 		
 		// canonicalize the SignedInfo element for signing
@@ -630,14 +622,12 @@ class XmlDigitalSignature
 		if (!array_key_exists($this->digestMethod, $this->openSSLAlgoMapping))
 		{
 			throw new \UnexpectedValueException('No OpenSSL algorithm has been defined for digest of type ' . $this->digestMethod);
-			return false;
 		}
 		
 		// sign the SignedInfo element using the private key
 		if (!openssl_sign($c14nSignedInfo, $signature, $this->privateKey, $this->openSSLAlgoMapping[$this->digestMethod]))
 		{
 			throw new \Exception('Unable to sign the document. Error: ' . openssl_error_string());
-			return false;
 		}
 		
 		$signature = base64_encode($signature);
@@ -647,7 +637,6 @@ class XmlDigitalSignature
 		if (is_null($signatureNode))
 		{
 			throw new \UnexpectedValueException('Unabled to locate the SingatureValue node');
-			return false;
 		}
 		
 		$signatureNode->appendChild($this->doc->createTextNode($signature));
@@ -666,7 +655,6 @@ class XmlDigitalSignature
 		if (is_null($this->publicKey))
 		{
 			throw new \UnexpectedValueException('No public key has been loaded');
-			return false;
 		}
 		
 		// find the SignedInfo element which was signed
@@ -674,7 +662,6 @@ class XmlDigitalSignature
 		if (is_null($signedInfo))
 		{
 			throw new \UnexpectedValueException('Unabled to located the SignedInfo node');
-			return false;
 		}
 		
 		// canonicalize the SignedInfo element for signature checking
@@ -685,7 +672,6 @@ class XmlDigitalSignature
 		if (is_null($signatureValue))
 		{
 			throw new \UnexpectedValueException('Unabled to located the SignatureValue node');
-			return false;
 		}
 		
 		$signature = base64_decode($signatureValue->nodeValue);	
@@ -764,7 +750,6 @@ class XmlDigitalSignature
 		}
 		
 		throw new \UnexpectedValueException('Unable to canonicalize the provided DOM document');
-		return false;
 	}
 	
 	/**
@@ -792,7 +777,6 @@ class XmlDigitalSignature
 		else if (0 === strlen($data))
 		{
 			throw new \InvalidArgumentException(sprintf('Digested data must be a non-empty string or DOMNode, %s was given', gettype($data)));
-			return false;
 		}
 		
 		// if the object is meant to be digested, do so
