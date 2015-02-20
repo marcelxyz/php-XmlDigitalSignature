@@ -334,10 +334,11 @@ class XmlDigitalSignature
 	/**
 	 * Loads a PEM formatted private key.
 	 * 
-	 * @param	string	$key		The private key in PEM format or a path to the key (see openssl_pkey_get_private)
-	 * @param	string	$passphrase	Password to the key file (if there is one)
-	 * @param	bool	$isFile		Whether the key is a path to a file
-	 * @return	bool				True if the key was successfully loaded, false otherwise
+	 * @param	string	$key				The private key in PEM format or a path to the key (see openssl_pkey_get_private)
+	 * @param	string	$passphrase			Password to the key file (if there is one)
+	 * @param	bool	$isFile				Whether the key is a path to a file
+	 * @return	bool						True if the key was successfully loaded, false otherwise
+	 * @throws	\UnexpectedValueException	Thrown if the key cannot be loaded
 	 */
 	public function loadPrivateKey($key, $passphrase = null, $isFile = true)
 	{
@@ -444,7 +445,7 @@ class XmlDigitalSignature
 	 * @param	DOMDocument|string			$publicKey	The DOMDocument containing the key, or a path to the key's location, or the key as a string
 	 * @param	string						$isFile		If set to true, the key will be loaded from the given path
 	 * @param	string						$objectId	ID attribute of the key (used to create a reference between the key and its <Reference/> node)
-	 * @throws	\InvalidArgumentException				Thrown when the provided key is in an unsupported format
+	 * @throws	\UnexpectedValueException				Thrown when the provided key is in an unsupported format
 	 * @return	bool									True if the key was successfully loaded, false otherwise
 	 */
 	public function loadPublicXmlKey($publicKey, $isFile = true, $objectId = null)
@@ -455,7 +456,7 @@ class XmlDigitalSignature
 			{
 				$publicKey = $this->loadFile($publicKey);
 			}
-			catch (\InvalidArgumentException $e)
+			catch (\UnexpectedValueException $e)
 			{
 				throw $e;
 			}
@@ -470,7 +471,7 @@ class XmlDigitalSignature
 			
 			if (!$keyNode->loadXML($publicKey))
 			{
-				throw new \InvalidArgumentException('The provided public XML key does not appear to be well structured XML');
+				throw new \UnexpectedValueException('The provided public XML key does not appear to be well structured XML');
 			}
 		}
 		// DOM nodes are sexy as fuck
@@ -481,7 +482,7 @@ class XmlDigitalSignature
 		// woops, a bad key was provided :(
 		else
 		{
-			throw new \InvalidArgumentException('Unsupported XML public key provided');
+			throw new \UnexpectedValueException('Unsupported XML public key provided');
 		}
 		
 		// add the key to the DOM
