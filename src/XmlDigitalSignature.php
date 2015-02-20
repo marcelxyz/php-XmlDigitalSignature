@@ -255,18 +255,13 @@ class XmlDigitalSignature
 	 */
 	public function setNodeNsPrefix($prefix)
 	{
-		if (!is_string($prefix))
+		if (!is_string($prefix) || 0 === strlen($prefix))
 		{
 			trigger_error('Node namespace prefixes must be non-empty strings', E_USER_WARNING);
 		}
 		else
-		{
-			if (strlen($prefix))
-			{
-				$prefix = rtrim($prefix, ':') . ':';
-			}
-			
-			$this->nodeNsPrefix = $prefix;
+		{			
+			$this->nodeNsPrefix = rtrim($prefix, ':') . ':';
 		}
 		
 		return $this;
@@ -431,7 +426,7 @@ class XmlDigitalSignature
 			
 		$key = @file_get_contents($filePath);
 			
-		if (empty($key))
+		if (!is_string($key) || 0 === strlen($key))
 		{
 			throw new \UnexpectedValueException(sprintf('File "%s" appears to be empty', $filePath));
 		}
@@ -752,25 +747,20 @@ class XmlDigitalSignature
 	/**
 	 * Appends an object to the signed XML documents
 	 * 
-	 * @param	DOMNode|string	$data	Data to add to the object node
-	 * @param	string					$objectId		ID attribute of the object
-	 * @param 	bool					$digestObject	Whether the object data should be digested
+	 * @param	DOMNode|string				$data			Data to add to the object node
+	 * @param	string						$objectId		ID attribute of the object
+	 * @param 	bool						$digestObject	Whether the object data should be digested
+	 * @throws	\InvalidArgumentException					If the $data argument is of an unsupported type
+	 * @throws	\UnexpectedValueException					If the canonicalization process failed
 	 */
 	public function addObject($data, $objectId = null, $digestObject = false)
 	{		
 		// if the provided object is a node or document, we must canonicalize it first
-		if (!is_string($data))
+		if (is_object($data) && $data instanceof DOMNode)
 		{
-			try
-			{
-				$data = $this->canonicalize($data);
-			}
-			catch (\UnexpectedValueException $e)
-			{
-				throw $e;
-			}
+			$data = $this->canonicalize($data);
 		}
-		else if (0 === strlen($data))
+		else if (!is_string($data) || 0 === strlen($data))
 		{
 			throw new \InvalidArgumentException(sprintf('Digested data must be a non-empty string or DOMNode, %s was given', gettype($data)));
 		}
@@ -827,7 +817,7 @@ class XmlDigitalSignature
 		// ensure that the selected digest method is supported by the current PHP version
 		if (!in_array($this->digestMethod, hash_algos()))
 		{
-			trigger_error(sprintf('This installation of PHP does not suppor the %s hashing algorithm', $this->digestMethod), E_USER_ERROR);
+			trigger_error(sprintf('This installation of PHP does not support the %s hashing algorithm', $this->digestMethod), E_USER_ERROR);
 		}
 	}
 }
