@@ -384,7 +384,6 @@ class XmlDigitalSignature
 			{
 				// up, up and away!
 				throw $e;
-				return false;
 			}
 		}
 		
@@ -464,7 +463,6 @@ class XmlDigitalSignature
 			catch (\InvalidArgumentException $e)
 			{
 				throw $e;
-				return false;
 			}
 		}
 		
@@ -583,7 +581,6 @@ class XmlDigitalSignature
 		catch (\UnexpectedValueException $e)
 		{
 			throw $e;
-			return false;
 		}
 		
 		// references are stored as digests, so we must do that as well
@@ -771,7 +768,6 @@ class XmlDigitalSignature
 			catch (\UnexpectedValueException $e)
 			{
 				throw $e;
-				return false;
 			}
 		}
 		else if (0 === strlen($data))
