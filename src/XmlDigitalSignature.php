@@ -543,7 +543,7 @@ class XmlDigitalSignature
 	 * @param	string					$uri	Reference URI attribute
 	 * @return	bool
 	 */
-	public function addRefernce(\DOMNode $node, $uri = null)
+	public function addReference(\DOMNode $node, $uri = null)
 	{		
 		// references are appended to the SignedInfo node
 		$signedInfo = $this->doc->getElementsByTagName($this->nodeNsPrefix . 'SignedInfo')->item(0);
