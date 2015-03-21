@@ -528,9 +528,6 @@ class XmlDigitalSignature
 			$keyValue->parentNode->setAttribute('Id', $objectId);
 		}
 		
-		// a reference to the public key also needs to be added to the DOM
-		$this->addReference($keyValue->parentNode, $objectId);
-		
 		return true;
 	}
 	
