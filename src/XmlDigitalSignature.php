@@ -3,7 +3,7 @@
 namespace XmlDsig;
 
 /**
- * Produces a XML digital signature compatible with the recommendations of the W3.
+ * Produces an XML digital signature compatible with the recommendations of the W3.
  * 
  * Based on the chosen canonicalization method (one of the class constants), the final
  * document is properly canonicalized and signed using one of the selected hashing (digest)
@@ -529,7 +529,7 @@ class XmlDigitalSignature
 		}
 		
 		// a reference to the public key also needs to be added to the DOM
-		$this->addRefernce($keyValue->parentNode, $objectId);
+		$this->addReference($keyValue->parentNode, $objectId);
 		
 		return true;
 	}
@@ -590,7 +590,6 @@ class XmlDigitalSignature
 	 * Signs the XML document with an XML digital signature
 	 * 
 	 * @throws	\UnexpectedValueException	If the XML tree is not intact or if there is no OpenSSL mapping set
-	 * @throws	\Exception					When unable to sign the document
 	 * @return	bool						True if the document was successfully signed, false otherwise
 	 */
 	public function sign()
@@ -620,7 +619,7 @@ class XmlDigitalSignature
 		// sign the SignedInfo element using the private key
 		if (!openssl_sign($c14nSignedInfo, $signature, $this->privateKey, $this->openSSLAlgoMapping[$this->digestMethod]))
 		{
-			throw new \Exception('Unable to sign the document. Error: ' . openssl_error_string());
+			throw new \UnexpectedValueException('Unable to sign the document. Error: ' . openssl_error_string());
 		}
 		
 		$signature = base64_encode($signature);
@@ -751,11 +750,15 @@ class XmlDigitalSignature
 	 * @param	DOMNode|string				$data			Data to add to the object node
 	 * @param	string						$objectId		ID attribute of the object
 	 * @param 	bool						$digestObject	Whether the object data should be digested
-	 * @throws	\InvalidArgumentException					If the $data argument is of an unsupported type
 	 * @throws	\UnexpectedValueException					If the canonicalization process failed
 	 */
 	public function addObject($data, $objectId = null, $digestObject = false)
-	{		
+	{
+		if (is_null($this->doc))
+		{
+			$this->createXmlStructure();
+		}
+		
 		// if the provided object is a node or document, we must canonicalize it first
 		if (is_object($data) && $data instanceof DOMNode)
 		{
@@ -763,7 +766,8 @@ class XmlDigitalSignature
 		}
 		else if (!is_string($data) || 0 === strlen($data))
 		{
-			throw new \InvalidArgumentException(sprintf('Digested data must be a non-empty string or DOMNode, %s was given', gettype($data)));
+			trigger_error(sprintf('Digested data must be a non-empty string or DOMNode, %s was given', gettype($data)), E_USER_WARNING);
+			return false;
 		}
 		
 		// if the object is meant to be digested, do so
@@ -786,10 +790,10 @@ class XmlDigitalSignature
 
 		// if the ID was provided, add it
 		$object->setAttribute('Id', $objectId);
-		
+
 		// objects also need to be digested and stored as references
 		// so that they can be signed later
-		$this->addRefernce($object, $objectId);
+		$this->addReference($object, $objectId);
 		
 		return true;
 	}
