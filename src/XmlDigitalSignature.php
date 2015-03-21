@@ -581,6 +581,8 @@ class XmlDigitalSignature
 		
 		$digestValue = $this->doc->createElement($this->nodeNsPrefix . 'DigestValue', $referenceDigest);
 		$reference->appendChild($digestValue);
+		
+		return true;
 	}
 	
 	/**
@@ -591,10 +593,10 @@ class XmlDigitalSignature
 	 */
 	public function sign()
 	{
-		// create the document structure if necessary
+		// the document must be set up
 		if (is_null($this->doc))
 		{
-			$this->createXmlStructure();
+			return new \UnexpectedValueException('No document structure to sign');
 		}
 		
 		// find the SignedInfo element, which is what we will actually sign
@@ -643,7 +645,8 @@ class XmlDigitalSignature
 	{
 		if (is_null($this->publicKey))
 		{
-			throw new \UnexpectedValueException('No public key has been loaded');
+			trigger_error('Cannot verify XML digital signature without public key', E_USER_WARNING);
+			return false;
 		}
 		
 		// find the SignedInfo element which was signed
@@ -651,6 +654,13 @@ class XmlDigitalSignature
 		if (is_null($signedInfo))
 		{
 			throw new \UnexpectedValueException('Unabled to located the SignedInfo node');
+		}
+		
+		// find the element with the public key and ensure it has children
+		$publicKey = $this->doc->getElementsByTagName($this->nodeNsPrefix . 'KeyValue')->item(0);
+		if (is_null($signedInfo) || !$publicKey->childNodes->length)
+		{
+			throw new \UnexpectedValueException('Unabled to located the KeyValue node or it has no children');
 		}
 		
 		// canonicalize the SignedInfo element for signature checking
@@ -757,14 +767,13 @@ class XmlDigitalSignature
 		}
 		
 		// if the provided object is a node or document, we must canonicalize it first
-		if (is_object($data) && $data instanceof DOMNode)
+		if (is_object($data) && $data instanceof \DOMNode)
 		{
 			$data = $this->canonicalize($data);
 		}
 		else if (!is_string($data) || 0 === strlen($data))
 		{
-			trigger_error(sprintf('Digested data must be a non-empty string or DOMNode, %s was given', gettype($data)), E_USER_WARNING);
-			return false;
+			throw new \UnexpectedValueException(sprintf('Digested data must be a non-empty string or DOMNode, %s was given', gettype($data)));
 		}
 		
 		// if the object is meant to be digested, do so
