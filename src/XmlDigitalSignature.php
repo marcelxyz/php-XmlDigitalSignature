@@ -255,13 +255,13 @@ class XmlDigitalSignature
 	 */
 	public function setNodeNsPrefix($prefix)
 	{
-		if (!is_string($prefix) || 0 === strlen($prefix))
+		if (is_string($prefix) && strlen($prefix))
 		{
-			trigger_error('Node namespace prefixes must be non-empty strings', E_USER_WARNING);
+			$this->nodeNsPrefix = rtrim($prefix, ':') . ':';
 		}
 		else
 		{			
-			$this->nodeNsPrefix = rtrim($prefix, ':') . ':';
+			$this->nodeNsPrefix = '';
 		}
 		
 		return $this;
