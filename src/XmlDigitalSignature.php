@@ -766,12 +766,11 @@ class XmlDigitalSignature
 			$this->createXmlStructure();
 		}
 		
-		// if the provided object is a node or document, we must canonicalize it first
-		if (is_object($data) && $data instanceof \DOMNode)
+		if (is_string($data) && strlen($data))
 		{
-			$data = $this->canonicalize($data);
+			$data = $this->doc->createTextNode($data);
 		}
-		else if (!is_string($data) || 0 === strlen($data))
+		else if (!is_object($data) || !$data instanceof \DOMNode)
 		{
 			throw new \UnexpectedValueException(sprintf('Digested data must be a non-empty string or DOMNode, %s was given', gettype($data)));
 		}
@@ -779,11 +778,17 @@ class XmlDigitalSignature
 		// if the object is meant to be digested, do so
 		if (true === $digestObject)
 		{
-			$data = $this->calculateDigest($data);
+			$digestedData = $this->calculateDigest($this->canonicalize($data));
+			$data = $this->doc->createTextNode($digestedData);
+		}
+		else
+		{
+			$data = $this->doc->importNode($data, true);
 		}
 		
 		// add the object to the dom
-		$object = $this->doc->createElement($this->nodeNsPrefix . 'Object', $data);
+		$object = $this->doc->createElement($this->nodeNsPrefix . 'Object');
+		$object->appendChild($data);
 		$this->doc->getElementsByTagName('Signature')->item(0)->appendchild($object);
 		
 		// objects must have an id attribute which will
