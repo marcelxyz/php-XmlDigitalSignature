@@ -84,7 +84,7 @@ Default: `dsig`.
 
 ## Public/private key generation
 
-Skip this section if your key pairs are already generated.
+Skip this section and go to [usage](#usage) if your key pairs are already generated.
 
 There are many ways to generate a key pair, however below are examples of RSA key generation using OpenSSL (unix terminal).
 
