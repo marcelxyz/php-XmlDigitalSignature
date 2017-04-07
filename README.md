@@ -4,9 +4,59 @@ This library was created to sign arbitrary data and whole XML documents using XM
 
 Should this class generate documents that do not validate (as there are many different specs for these signatures, of which I have tested only a handful), please contact me and I will do my best to provide support for your needs.
 
-## Options for generating and signing documents (AKA how to use this lib)
+# Installation
 
-### Digest (hashing) methods
+Using composer:
+
+    php composer.phar require "marcelxyz/php-xml-digital-signature"
+
+Alternatively require the `src/XmlDigitalSignature.php` file in your project.
+
+# Examples
+
+Here's a basic overview of how to use this library:
+
+```php
+$dsig = new XmlDsig\XmlDigitalSignature();
+
+$dsig->loadPrivateKey('path/to/private/key', 'passphrase');
+$dsig->loadPublicKey('path/to/public/key');
+
+$dsig->addObject('I am a data blob.');
+$dsig->sign();
+
+$result = $dsig->getSignedDocument();
+```
+
+Please see the `examples/` folder for more elaborate examples.
+
+# API docs
+
+To sign an XML document you need to answer the following questions:
+
+1. Which signature algorithm (RSA/DSA/ECDSA etc.) will you be using?
+2. Which digest (hashing) method will you be using?
+3. Which C14N (canonicalization) method will you be using?
+4. Do you want to include public key information within the resulting XML document?
+
+These are covered in the following subsections.
+
+## Configuration
+
+### Signature algorithm
+
+The following signature algorithms are currently supported:
+
+- [DSA](https://www.w3.org/TR/xmlsec-algorithms/#DSA) (`XmlDsig\XmlDigitalSignature::DSA_ALGORITHM`)
+- [RSA](https://www.w3.org/TR/xmlsec-algorithms/#RSA) (`XmlDsig\XmlDigitalSignature::RSA_ALGORITHM`)
+- [Elliptic Curve DSA](https://www.w3.org/TR/xmlsec-algorithms/#ECDSA) (`XmlDsig\XmlDigitalSignature::ECDSA_ALGORITHM`)
+- [HMAC](https://www.w3.org/TR/xmlsec-algorithms/#hmac) (`XmlDsig\XmlDigitalSignature::HMAC_ALGORITHM`)
+
+Specify the appropriate one using the `XmlDsig\XmlDigitalSignature.setCryptoAlgorithm(algo)` method with the appropriate `XmlDsig\XmlDigitalSignature::*_ALGORITHM` constant.
+
+Default: RSA.
+
+### Digest method
 
 This library currently supports four digest methods, those being:
 
@@ -15,34 +65,44 @@ This library currently supports four digest methods, those being:
 - [SHA512](http://www.w3.org/2001/04/xmlenc#sha512) (`XmlDsig\XmlDigitalSignature::DIGEST_SHA512`)
 - [RIPMED-160](http://www.w3.org/2001/04/xmlenc#ripemd160) (`XmlDsig\XmlDigitalSignature::DIGEST_RIPEMD160`)
 
-Your version of PHP must provide support for the digest method you choose. This library will check this automatically, but you can also do this yourself by calling PHP's `hash_algos()` function.
+Your version of PHP must provide support for the digest method you choose. This library will check this automatically, but you can also do this yourself by calling PHP's [hash_algos()](http://php.net/manual/en/function.hash-algos.php) function.
 
-By default, the SHA1 digest is used. If you wish to use a different digest, call the `XmlDsig\XmlDigitalSignature::setDigestMethod()` method with the appropriate `XmlDsig\XmlDigitalSignature::DIGEST_*` constant.
+Specify the appropriate digest by calling the `XmlDsig\XmlDigitalSignature.setDigestMethod(digest)` method with the appropriate `XmlDsig\XmlDigitalSignature::DIGEST_*` constant.
 
-If you would like to add support for a different hashing method (provided, of course, that your version of PHP supports it), add a new `XmlDsig\XmlDigitalSignature::DIGEST_*` const with a value defined in `hash_algos()`. Remember to add the proper mapping values to the following class properties: `$digestMethodUriMapping`, `$openSSLAlgoMapping`, `$digestSignatureAlgoMapping` (read the `@see` notes in the comments of these properties for more information).
+To add support for a different hashing method (provided your version of PHP supports it), add a new `XmlDsig\XmlDigitalSignature::DIGEST_*` const with a value defined in `hash_algos()`. Remember to add the proper mapping values to the following class properties: `$digestMethodUriMapping`, `$openSSLAlgoMapping`, `$digestSignatureAlgoMapping` (read the `@see` notes in the comments of these properties for more information).
 
-### Canonicalization (C14N) methods
+Default: SHA1.
+
+### C14N methods
 
 This lib currently supports the following canonicalization methods:
 
 - [Canonical XML](http://www.w3.org/TR/2001/REC-xml-c14n-20010315) (`XmlDsig\XmlDigitalSignature::C14N`)
 - [Canonical XML with comments](http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments) (`XmlDsig\XmlDigitalSignature::C14N_COMMENTS`)
 - [Exclusive canonical XML](http://www.w3.org/2001/10/xml-exc-c14n#) (`XmlDsig\XmlDigitalSignature::C14N_EXCLUSIVE`)
-- [CExclusive canonical XML with comments](http://www.w3.org/2001/10/xml-exc-c14n#WithComments) (`XmlDsig\XmlDigitalSignature::C14N_EXCLUSIVE_COMMENTS`)
+- [Exclusive canonical XML with comments](http://www.w3.org/2001/10/xml-exc-c14n#WithComments) (`XmlDsig\XmlDigitalSignature::C14N_EXCLUSIVE_COMMENTS`)
 
-These can be extended as needed, by adding the necessary class constants. If you do add a new canonicaliation method, remember to add its specific options to the `XmlDsig\XmlDigitalSignature::$c14nOptionMapping` array.
+These can be extended by adding the necessary class constants. If you do add a new C14N method, remember to add its specific options to the `XmlDsig\XmlDigitalSignature::$c14nOptionMapping` array.
 
-By default, the Canonical XML method is used. In order to specify a different C14N method, call the `XmlDsig\XmlDigitalSignature::setCanonicalMethod()` method, with the appropriate `XmlDsig\XmlDigitalSignature::C14N_*` constant as the argument.
+In order to specify a different C14N method, call the `XmlDsig\XmlDigitalSignature.setCanonicalMethod(c14n)` method with the appropriate `XmlDsig\XmlDigitalSignature::C14N_*` constant.
+
+Default: Canonical XML.
 
 ### Standalone XML
 
-By default, the generated XML document is created with the standalone pseudo-attribute set to `no`. In order to change this, simply call the `XmlDsig\XmlDigitalSignature::forceStandalone()` method.
+To force the resulting XML to contain the standalone pseudo-attribute set to `yes` simply call the `XmlDsig\XmlDigitalSignature.forceStandalone()` method.
+
+Default: `no`.
 
 ### Node namespace prefixes
 
-By default, all nodes in the generated XML document have a namespace prefix of `dsig:`. If you would like to specify a different ns prefix (or you don't want to use one at all), simply pass the appropriate value to the `XmlDsig\XmlDigitalSignature::setNodeNsPrefix()` method.
+To specify a different ns prefix (or you don't want to use one at all), simply pass the appropriate value to the `XmlDsig\XmlDigitalSignature.setNodeNsPrefix(prefix)` method.
 
-## Public/private key pair generation
+Default: `dsig`.
+
+## Public/private key generation
+
+Skip this section and go to [usage](#usage) if your key pairs are already generated.
 
 There are many ways to generate a key pair, however below are examples of RSA key generation using OpenSSL (unix terminal).
 
@@ -72,28 +132,32 @@ Public RSA X.509 certificates can be converted to XML format using [http://tools
 
 Public RSA PEM certificates, on the other hand, can be converted to XML format using [https://superdry.apphb.com/tools/online-rsa-key-converter](https://superdry.apphb.com/tools/online-rsa-key-converter).
 
+## Usage
+
+Once you have generated your keys and configured the environment then you are ready to start loading keys and adding objects. The methods are explained below.
+
 ### Loading the generated keys
 
-Once you have generated the appropriate private, public and XML keys (if necessary), you can load them using the `XmlDsig\XmlDigitalSignature::loadPrivateKey()`, `XmlDsig\XmlDigitalSignature::loadPublicKey()`, `XmlDsig\XmlDigitalSignature::loadPublicXmlKey()` methods, respectively.
+Once you have generated the appropriate private, public and XML keys (if necessary), you can load them using the `XmlDsig\XmlDigitalSignature.loadPrivateKey()`, `XmlDsig\XmlDigitalSignature.loadPublicKey()`, `XmlDsig\XmlDigitalSignature.loadPublicXmlKey()` methods, respectively.
 
-## Adding objects
+### Adding objects
 
-Object data (strings or DOMNodes) can be added to the XML document using the `XmlDsig\XmlDigitalSignature::addObject()` method. If the value of the object needs to be hashed, be sure to pass `true` as the third paramater of the aforementioned method.
+Object data (strings or DOMNodes) can be added to the XML document using the `XmlDsig\XmlDigitalSignature.addObject()` method. If the value of the object needs to be hashed, be sure to pass `true` as the third paramater of the aforementioned method.
 
 The resulting data will be placed inside of an `<Object/>` node, and an appropriate `<Reference/>` element set will be generated, containing the digest of the object.
 
-## Signing the document
+### Signing the document
 
-What may seem trivial by now, you sign the generated XML document using the `XmlDsig\XmlDigitalSignature::sign()` method. Of course, be sure to watch out for the return values of the method and any exceptions it might throw.
+What may seem trivial by now, you sign the generated XML document using the `XmlDsig\XmlDigitalSignature.sign()` method. Of course, be sure to watch out for the return values of the method and any exceptions it might throw.
 
-## Verifying the signatures
+### Verifying the signatures
 
-In turn, signatures may be verified using the `XmlDsig\XmlDigitalSignature::verify()` method.
+In turn, signatures may be verified using the `XmlDsig\XmlDigitalSignature.verify()` method.
 
-## Returning the document
+### Returning the document
 
-`XmlDsig\XmlDigitalSignature::getSignedDocument()` returns the canonicalized XML markup, as a string.
+`XmlDsig\XmlDigitalSignature.getSignedDocument()` returns the canonicalized XML markup as a string.
 
-## Verifying the document validity
+### Verifying the document validity
 
-Other than writing a whole parser to verify the generated document, I recommend that you use this online tool: [http://www.aleksey.com/xmlsec/xmldsig-verifier.html](http://www.aleksey.com/xmlsec/xmldsig-verifier.html).
+To test XML digital signatures with the public key contained in the document I recommend that you use this online tool: [http://www.aleksey.com/xmlsec/xmldsig-verifier.html](http://www.aleksey.com/xmlsec/xmldsig-verifier.html).

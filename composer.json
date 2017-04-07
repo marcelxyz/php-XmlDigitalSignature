@@ -1,0 +1,32 @@
+{
+  "name": "marcelxyz/php-xml-digital-signature",
+  "description": "A PHP library for signing XML documents using digital signatures",
+  "license": "MIT",
+  "keywords": [
+    "xml",
+    "signature",
+    "xmldsig",
+    "xml-dsig",
+    "xml-sig",
+    "pkcs"
+  ],
+  "homepage": "https://github.com/marcelxyz/php-XmlDigitalSignature",
+  "require": {
+    "php": ">= 5.3"
+  },
+  "authors": [
+    {
+      "name": "Marcel Tyszkiewicz",
+      "email": "marcel.tyszkiewicz@gmail.com"
+    }
+  ],
+  "suggest": {
+    "ext-openssl": "OpenSSL extension",
+    "ext-mcrypt": "MCrypt extension"
+  },
+  "autoload": {
+    "psr-4": {
+      "XmlDsig\\": "src/"
+    }
+  }
+}
