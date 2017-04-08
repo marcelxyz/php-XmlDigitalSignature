@@ -469,7 +469,7 @@ class XmlDigitalSignature
 		{
 			$keyNode = new \DOMDocument;
 			
-			if (!$keyNode->loadXML($publicKey))
+			if (!@$keyNode->loadXML($publicKey))
 			{
 				throw new \UnexpectedValueException('The provided public XML key does not appear to be well structured XML');
 			}
@@ -541,7 +541,12 @@ class XmlDigitalSignature
 	 * @return	bool
 	 */
 	public function addReference(\DOMNode $node, $uri = null)
-	{		
+	{
+        if (is_null($this->doc))
+        {
+            $this->createXmlStructure();
+        }
+
 		// references are appended to the SignedInfo node
 		$signedInfo = $this->doc->getElementsByTagName($this->nodeNsPrefix . 'SignedInfo')->item(0);
 		
@@ -608,7 +613,7 @@ class XmlDigitalSignature
 		
 		// canonicalize the SignedInfo element for signing
 		$c14nSignedInfo = $this->canonicalize($signedInfo);
-		
+
 		// make sure that we know which OpenSSL algo type to use
 		if (!array_key_exists($this->digestMethod, $this->openSSLAlgoMapping))
 		{
@@ -653,14 +658,7 @@ class XmlDigitalSignature
 		$signedInfo = $this->doc->getElementsByTagName($this->nodeNsPrefix . 'SignedInfo')->item(0);
 		if (is_null($signedInfo))
 		{
-			throw new \UnexpectedValueException('Unabled to located the SignedInfo node');
-		}
-		
-		// find the element with the public key and ensure it has children
-		$publicKey = $this->doc->getElementsByTagName($this->nodeNsPrefix . 'KeyValue')->item(0);
-		if (is_null($signedInfo) || !$publicKey->childNodes->length)
-		{
-			throw new \UnexpectedValueException('Unabled to located the KeyValue node or it has no children');
+			throw new \UnexpectedValueException('Unable to locate the SignedInfo node');
 		}
 		
 		// canonicalize the SignedInfo element for signature checking
@@ -670,7 +668,7 @@ class XmlDigitalSignature
 		$signatureValue = $this->doc->getElementsByTagName($this->nodeNsPrefix . 'SignatureValue')->item(0);
 		if (is_null($signatureValue))
 		{
-			throw new \UnexpectedValueException('Unabled to located the SignatureValue node');
+			throw new \UnexpectedValueException('Unable to locate the SignatureValue node');
 		}
 		
 		$signature = base64_decode($signatureValue->nodeValue);	
