@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xyz:Signature xmlns:xyz="http://www.w3.org/2000/09/xmldsig#">
+    <xyz:SignedInfo>
+        <xyz:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"/>
+        <xyz:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#hmac-sha256"/>
+        <xyz:Reference URI="#objectA">
+            <xyz:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+            <xyz:DigestValue>jRh+bedAzKIBW7V7F0mPFiyI1xc+MMP7ebTPhKKHcUE=</xyz:DigestValue>
+        </xyz:Reference>
+    </xyz:SignedInfo>
+    <xyz:SignatureValue>UDgylbMhH/BcF1et06Urmf0cSuCdIaUCLAwJ7o8328Bd4NcswBXi5/M0YQzZepKcfghD9gCdkvb0RVJ3J1F5aaj2Aus3FH6fnfUg9aRodOOOcs3wA+ziODrzljRuqIwqZSskKMwIf/0RE1JUWj/e0T6Z+HduGOyq7Xu7TclbkiZBTxwNE706wxT68khXX7S7iCeqXBTIy8MLAMgkZHxLjtslVcornJCuWx9vL3RL0Jsou7xabQojL99MGBtKNbT3O/4t+7ojxXvnT62YL4qU4KCWGxTJxjXj8y7xZrIu+2MDpWtlLtS2R26+EHNw5ZdW8cCipzbR0Cg/2vSgc9UBjA==</xyz:SignatureValue>
+    <xyz:KeyInfo>
+        <xyz:KeyValue>
+            <xyz:RSAKeyValue>
+                <xyz:Modulus>wIwOlqlUOzhC0VRfNYZoHXQaS936fJKYmQGX+IzPGuK0eHKNDCUcKEpkpBc1K9U0FjO+vfGpodayd8fNWwFpZ+9E8t/ZD9253bN3xXsZtdthijmKLLi5vZ1fRVDFXc8fq2uZiBhgtr4F8vLVf6jn3EBFH2PAeaz8A6YGnNs2KAGBGZ6pSMj4TNZqAuNLyTSwaumFkjPDOzBwW6c0FRg900Lk53Yq2jl020vclGOloHquhLPsK4V+Dt5SwrJ4FyIPm5RK1pmIjj8Kk1aWPlN5MYFRaWfC1c+faKWGcwJc4hdDIYJvPbL60uRib++vXirs5qf2MTytP6/+OhEs6F1owQ==</xyz:Modulus>
+                <xyz:Exponent>AQAB</xyz:Exponent>
+            </xyz:RSAKeyValue>
+        </xyz:KeyValue>
+    </xyz:KeyInfo>
+    <xyz:Object Id="objectA">a</xyz:Object>
+</xyz:Signature>
