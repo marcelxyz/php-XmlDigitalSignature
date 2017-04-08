@@ -154,10 +154,12 @@ What may seem trivial by now, you sign the generated XML document using the `Xml
 
 In turn, signatures may be verified using the `XmlDsig\XmlDigitalSignature.verify()` method.
 
+Additionally you can use the [Aleksey validator](http://www.aleksey.com/xmlsec/xmldsig-verifier.html) to check dsigs. However, be aware that this validator is faulty. Namely:
+
+1. The public key must be embedded into the XML markup.
+2. Valid documents that are "pretty-printed" fail validation, but pass once the extra tabs/newlines are removed.
+3. It only works with RSA encryption.
+
 ### Returning the document
 
 `XmlDsig\XmlDigitalSignature.getSignedDocument()` returns the canonicalized XML markup as a string.
-
-### Verifying the document validity
-
-To test XML digital signatures with the public key contained in the document I recommend that you use this online tool: [http://www.aleksey.com/xmlsec/xmldsig-verifier.html](http://www.aleksey.com/xmlsec/xmldsig-verifier.html).
