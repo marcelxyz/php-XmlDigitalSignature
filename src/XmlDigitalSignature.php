@@ -44,7 +44,7 @@ class XmlDigitalSignature
 	 * RIPEMD-160 hashing algorithm
 	 * @var string
 	 */
-	const DIGEST_RIPEMD160 = 'ripmed160';
+	const DIGEST_RIPEMD160 = 'ripemd160';
 
 	/**
 	 * Standard XML canonicalization method, as per the W3 spec
